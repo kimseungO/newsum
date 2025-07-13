@@ -210,7 +210,9 @@ export default function TopNewsBar({ onTitleClick }) {
             const weekday = date.toLocaleDateString("ko-KR", {
               weekday: "short",
             });
-            return `${month}월 ${day}일 (${weekday}) 16:00`;
+            const hours = String(date.getHours()).padStart(2, "0");
+
+            return `${month}월 ${day}일 (${weekday}) ${hours}:00`;
           };
 
           return `분석 기준 : ${formatDate(start)} ~ ${formatDate(end)}`;
