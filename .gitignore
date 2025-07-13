@@ -5,3 +5,7 @@ dist/
 backend/.env
 frontend/.env
 .dockerignore 
+shellScript/final files/secret.yaml
+shellScript/newsum/secret.yaml
+shellScript/newsum/tls.crt
+shellScript/newsum/certs
