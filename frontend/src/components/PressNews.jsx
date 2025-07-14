@@ -36,7 +36,7 @@ export default function PressNews({ onTitleClick }) {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await axios.get("http://localhost:3001/api/news/press");
+        const res = await axios.get("/api/news/press");
         const rows = res.data;
 
         const grouped = {};

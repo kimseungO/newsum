@@ -17,7 +17,7 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: worker2
       containers:
-        - name: mysql-container
+        - name: mysql-service
           image: mysql:8.0
           envFrom:
             - configMapRef:

@@ -23,7 +23,7 @@ export default function CategoryCards() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/news/topic");
+        const response = await fetch("/api/news/topic");
         const data = await response.json();
 
         // ✅ 여기부터 그룹핑 로직 삽입

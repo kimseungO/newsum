@@ -21,8 +21,8 @@ let httpsOptions;
 if (isKubernetes) {
   // ✅ K8s나 Docker 환경 (실제 인증서 mount)
   httpsOptions = {
-    key: fs.readFileSync("/app/certs/key.pem"),
-    cert: fs.readFileSync("/app/certs/cert.pem"),
+    key: fs.readFileSync("./certs/key.pem"),
+    cert: fs.readFileSync("./certs/cert.pem"),
   };
 } else {
   // ✅ 로컬 개발 환경 (self-signed 인증서 자동 생성)

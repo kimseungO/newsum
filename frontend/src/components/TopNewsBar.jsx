@@ -24,7 +24,7 @@ export default function TopNewsBar({ onTitleClick }) {
 
     const fetchTopNews = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/news/top10");
+        const response = await fetch("/api/news/top10");
         const data = await response.json();
         setTopNews(data);
       } catch (error) {
