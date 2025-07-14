@@ -1,4 +1,5 @@
 import React from "react";
+import defaultImage from "../assets/logo.png";
 
 export default function NewsCard({
   category,
@@ -92,8 +93,12 @@ export default function NewsCard({
 
       {/* 이미지 */}
       <img
-        src={image}
+        src={image && image.trim() !== "" ? image : defaultImage}
         alt="뉴스 이미지"
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.src = defaultImage;
+        }}
         style={{
           width: "95%",
           height: "140px",

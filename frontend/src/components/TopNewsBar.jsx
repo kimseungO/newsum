@@ -35,31 +35,35 @@ export default function TopNewsBar({ onTitleClick }) {
     fetchTopNews();
   }, []);
 
-  const handleTitleClick = (news) => {
+  const handleTitleClick = async (news) => {
     const keywords = news.keyword
       ? news.keyword.split(",").map((k) => k.trim())
       : [];
 
-    const relatedNews = topNews
-      .filter(
-        (n) => n.topic_id === news.topic_id && n.news_link !== news.news_link
-      )
-      .map((n) => ({
-        title: n.news_title,
-        link: n.news_link,
-        press: n.press_name,
-        upload_date: n.upload_date,
-      }));
+    try {
+      // 🔁 topic_id로 관련 뉴스 요청
+      const res = await fetch(`/api/news/related?topic_id=${news.topic_id}`);
+      const related = await res.json();
 
-    onTitleClick?.({
-      title: news.topic_title || news.news_title || "제목 없음",
-      press: news.press_name ?? "언론사 미표시",
-      upload_date: news.upload_date ?? new Date().toISOString(),
-      link: news.news_link,
-      summary: news.topic_content ?? "요약 없음",
-      relatedWords: keywords,
-      relatedNews,
-    });
+      const relatedNews = related
+        .filter((n) => n.news_link !== news.news_link)
+        .map((n) => ({
+          title: n.news_title,
+          link: n.news_link,
+          press: n.press_name,
+          upload_date: n.upload_date,
+        }));
+
+      onTitleClick?.({
+        title: news.topic_title ?? "제목 없음",
+        summary: news.topic_content ?? "요약 없음",
+        relatedWords: keywords,
+        topic_id: news.topic_id,
+        relatedNews, // ✅ 누락 금지
+      });
+    } catch (err) {
+      console.error("❌ 관련 뉴스 가져오기 실패", err);
+    }
   };
 
   const renderList = (newsArray, startIndex) =>
@@ -89,7 +93,7 @@ export default function TopNewsBar({ onTitleClick }) {
           <strong style={{ marginRight: "0.75rem", color: "#ccc" }}>
             {startIndex + i}
           </strong>
-          {decodeHtmlEntities(news.news_title)}
+          {decodeHtmlEntities(news.topic_title)}
         </span>
         <span
           style={{
@@ -198,11 +202,10 @@ export default function TopNewsBar({ onTitleClick }) {
         }}
       >
         {(() => {
-          const now = new Date();
-          const end = new Date(now);
-          end.setHours(16, 0, 0, 0);
+          const now = new Date(); // 현재 시각
+          const end = new Date(now); // 끝 시점은 현재 시각
           const start = new Date(end);
-          start.setDate(start.getDate() - 1);
+          start.setDate(start.getDate() - 1); // 하루 전
 
           const formatDate = (date) => {
             const month = date.getMonth() + 1;
