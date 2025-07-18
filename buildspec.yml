@@ -39,7 +39,7 @@ phases:
       - echo "Pushing the Docker image to ECR..."
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       # EKS 클러스터에 연결 설정
-      - echo "Configuring kubectl for EKS cluster: $EKS_CLUSTER_NAME"
+      - echo "Configuring kubectl for EKS cluster = $EKS_CLUSTER_NAME"
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
       # deployment.yaml 파일의 이미지 주소를 방금 푸시한 이미지로 교체
       - echo "Updating Kubernetes deployment with new image..."
