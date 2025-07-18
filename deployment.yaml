@@ -16,8 +16,15 @@ spec:
     spec:
       containers:
         - name: newsum-container
-          image: bbin99/newsum-http:latest
+          image: IMAGE_PLACEHOLDER
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           envFrom:
             - configMapRef:
                 name: newsum-config
