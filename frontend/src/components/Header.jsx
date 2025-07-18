@@ -17,7 +17,7 @@ export default function Header() {
             className="subscribe-button"
             onClick={() => setShowModal(true)} // ✅ 클릭 시 모달 열기
           >
-            구독 신청
+            구독 신청_v2
           </button>
         </div>
       </header>
