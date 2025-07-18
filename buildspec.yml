@@ -1,0 +1,52 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18 # 사용할 Docker 런타임 버전
+    commands:
+      # kubectl 설치 (EKS 클러스터 제어를 위해 필요)
+      - echo "Installing kubectl..."
+      - curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.28.5/2024-01-04/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin/kubectl
+
+  pre_build:
+    commands:
+      # 필수 환경 변수들이 제대로 설정되었는지 확인
+      - echo "Checking environment variables..."
+      - |
+        if [ -z "$AWS_ACCOUNT_ID" ] || [ -z "$AWS_DEFAULT_REGION" ] || [ -z "$IMAGE_REPO_NAME" ] || [ -z "$EKS_CLUSTER_NAME" ]; then
+          echo "Error: Required environment variables are not set."
+          exit 1
+        fi
+      # ECR(Docker 이미지 저장소)에 로그인
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      # 사용할 이미지 URI와 태그 정의
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION:-latest} # Git 커밋 해시를 태그로 사용, 없으면 latest
+
+  build:
+    commands:
+      # Dockerfile을 사용하여 이미지 빌드
+      - echo "Building the Docker image... ($REPOSITORY_URI:$IMAGE_TAG)"
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+
+  post_build:
+    commands:
+      # 빌드한 이미지를 ECR에 푸시
+      - echo "Pushing the Docker image to ECR..."
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      # EKS 클러스터에 연결 설정
+      - echo "Configuring kubectl for EKS cluster: $EKS_CLUSTER_NAME"
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
+      # --- 중요! ---
+      # deployment.yaml 파일의 이미지 주소를 방금 푸시한 이미지로 교체
+      - echo "Updating Kubernetes deployment with new image..."
+      - sed -i.bak "s|IMAGE_PLACEHOLDER|$REPOSITORY_URI:$IMAGE_TAG|g" deployment.yaml
+      # 수정된 deployment.yaml과 service.yaml을 EKS 클러스터에 적용
+      - echo "Applying Kubernetes manifests..."
+      - kubectl apply -f deployment.yaml
+      - kubectl apply -f service.yaml
+      - echo "Deployment successful!"
