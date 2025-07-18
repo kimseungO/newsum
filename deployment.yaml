@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: newsum-deployment
+  labels:
+    app: newsum-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: newsum-app
+  template:
+    metadata:
+      labels:
+        app: newsum-app
+    spec:
+      containers:
+        - name: newsum-container
+          image: bbin99/newsum-http:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: newsum-config
