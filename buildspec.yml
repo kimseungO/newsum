@@ -2,8 +2,6 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      docker: 18
     commands:
       # kubectl 설치 (EKS 클러스터 제어를 위해 필요)
       - echo "Installing kubectl..."
